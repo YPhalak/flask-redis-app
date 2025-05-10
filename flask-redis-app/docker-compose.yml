@@ -1,13 +1,31 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  web:
+  flask-app:
     build: .
     ports:
-      - "5000:5000"
+      - "${FLASK_PORT}:5000"
+    environment:
+      - FLASK_ENV=${FLASK_ENV}
+      - REDIS_HOST=${REDIS_HOST}
     depends_on:
       - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://192.168.0.106:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   redis:
     image: redis:alpine
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  redis-data:
 
